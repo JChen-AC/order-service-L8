@@ -36,7 +36,7 @@ module.exports = fp(async function (fastify, opts) {
         });
         sender.close();
         connection.close();
-      })ac
+      })
 
       connection.open_sender({
         // Claude was used to help determine how to make rabbitmq persistent 
