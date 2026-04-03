@@ -29,14 +29,23 @@ module.exports = fp(async function (fastify, opts) {
       
       container.once('sendable', function (context) {
         const sender = context.sender;
-        sender.send({
-          body: amqp_message.data_section(Buffer.from(body,'utf8'))
+        sender.send({          
+          body: amqp_message.data_section(Buffer.from(body,'utf8')),
+          message_annotations: { "x-opt-delivery-mode": 2 } // persistent
+
         });
         sender.close();
         connection.close();
-      })
+      })ac
 
-      connection.open_sender(process.env.ORDER_QUEUE_NAME)
+      connection.open_sender({
+        // Claude was used to help determine how to make rabbitmq persistent 
+        target: {
+          address: process.env.ORDER_QUEUE_NAME,
+          durable: 2,          // 2 = terminusExpiryPolicy.never (queue survives restart)
+          expiry_policy: 'never'
+        }
+      })
     } else if (process.env.USE_WORKLOAD_IDENTITY_AUTH === 'true') {
       const { ServiceBusClient } = require("@azure/service-bus");
       const { DefaultAzureCredential } = require("@azure/identity");
